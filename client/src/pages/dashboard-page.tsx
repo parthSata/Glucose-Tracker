@@ -1,16 +1,10 @@
-import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { useLogout } from '@/hooks/use-logout'
 import { useAuthStore } from '@/store/auth-store'
 
 export default function DashboardPage() {
-  const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
-  const clearSession = useAuthStore((state) => state.clearSession)
-
-  function handleLogout() {
-    clearSession()
-    navigate('/login', { replace: true })
-  }
+  const { logout, isLoggingOut } = useLogout()
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col gap-6 px-4 py-10 sm:px-6">
@@ -27,8 +21,15 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="sm:w-40">
-          <Button type="button" variant="secondary" onClick={handleLogout}>
-            Log out
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isLoggingOut}
+            onClick={() => {
+              void logout()
+            }}
+          >
+            {isLoggingOut ? 'Signing out…' : 'Log out'}
           </Button>
         </div>
       </header>

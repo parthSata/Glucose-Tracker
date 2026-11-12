@@ -2,6 +2,10 @@ import bcrypt from 'bcrypt'
 import { Prisma } from '@prisma/client'
 import { env } from '@/config/env'
 import { prisma } from '@/lib/prisma'
+import {
+  publicUserSelect,
+  toPublicUser,
+} from '@/lib/public-user'
 import type {
   LoginBody,
   RegisterBody,
@@ -14,20 +18,6 @@ const INVALID_CREDENTIALS_MESSAGE = 'Invalid email or password.'
 /** Precomputed bcrypt hash used when no user exists (keeps compare timing similar). */
 const DUMMY_PASSWORD_HASH =
   '$2b$10$.36TMSiuEcUkCpmXcj2uqenhzAWx.WFoaqv0l8zPze3WDA90iBrKu'
-
-function toPublicUser(user: {
-  id: string
-  name: string
-  email: string
-  createdAt: Date
-}) {
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    createdAt: user.createdAt.toISOString(),
-  }
-}
 
 export async function registerUser(input: RegisterBody) {
   const existing = await prisma.user.findUnique({
@@ -48,12 +38,7 @@ export async function registerUser(input: RegisterBody) {
         email: input.email,
         passwordHash,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      },
+      select: publicUserSelect,
     })
 
     const token = signAccessToken({
@@ -81,10 +66,7 @@ export async function loginUser(input: LoginBody) {
   const user = await prisma.user.findUnique({
     where: { email: input.email },
     select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
+      ...publicUserSelect,
       passwordHash: true,
     },
   })
@@ -104,6 +86,7 @@ export async function loginUser(input: LoginBody) {
     name: user.name,
   })
 
+  // passwordHash is intentionally omitted from the returned public user.
   return {
     user: toPublicUser(user),
     token,
@@ -113,12 +96,7 @@ export async function loginUser(input: LoginBody) {
 export async function getCurrentUser(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      createdAt: true,
-    },
+    select: publicUserSelect,
   })
 
   if (!user) {

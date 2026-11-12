@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { login, me, register } from '@/controllers/auth.controller'
+import { login, logout, me, register } from '@/controllers/auth.controller'
 import { authMiddleware } from '@/middleware/auth.middleware'
 import { validateRequest } from '@/middleware/validate.middleware'
 import { asyncHandler } from '@/utils/async-handler'
@@ -23,5 +23,6 @@ authRoutes.post(
 )
 
 authRoutes.get('/me', authMiddleware, asyncHandler(me))
+authRoutes.post('/logout', authMiddleware, asyncHandler(logout))
 
 export { authRoutes }

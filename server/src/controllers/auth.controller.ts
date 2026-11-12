@@ -8,7 +8,7 @@ import type {
   LoginBody,
   RegisterBody,
 } from '@/validators/auth.validators'
-import { ApiError } from '@/utils/api-error'
+import { requireAuthUser } from '@/utils/require-auth-user'
 import { ApiResponse } from '@/utils/api-response'
 
 export async function register(req: Request, res: Response): Promise<void> {
@@ -28,11 +28,18 @@ export async function login(req: Request, res: Response): Promise<void> {
 }
 
 export async function me(req: Request, res: Response): Promise<void> {
-  if (!req.user) {
-    throw new ApiError(401, 'Authentication required.')
-  }
-
-  const user = await getCurrentUser(req.user.id)
+  const authUser = requireAuthUser(req)
+  const user = await getCurrentUser(authUser.id)
 
   res.status(200).json(new ApiResponse(200, { user }, 'Success'))
+}
+
+export async function logout(req: Request, res: Response): Promise<void> {
+  // Stateless JWT: auth middleware already verified the session.
+  // Client must discard the token; server confirms logout for the UX/API contract.
+  requireAuthUser(req)
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Logged out successfully.'))
 }

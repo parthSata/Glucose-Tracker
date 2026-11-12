@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '@/store/auth-store'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api',
@@ -8,7 +9,7 @@ const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('sweety_token')
+  const token = useAuthStore.getState().token
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -19,7 +20,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      localStorage.removeItem('sweety_token')
+      useAuthStore.getState().clearSession()
     }
     return Promise.reject(error)
   },
