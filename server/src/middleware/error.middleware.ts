@@ -4,13 +4,6 @@ import { ZodError } from 'zod'
 import { env } from '@/config/env'
 import { ApiError } from '@/utils/api-error'
 
-const TIME_SLOT_LABELS: Record<string, string> = {
-  MORNING: 'Morning (fasting)',
-  AFTER_BREAKFAST: 'After breakfast',
-  AFTER_LUNCH: 'After lunch',
-  AFTER_DINNER: 'After dinner',
-}
-
 function uniqueConstraintMessage(meta: unknown): string {
   if (
     meta &&
@@ -85,6 +78,4 @@ export function errorMiddleware(
   })
 }
 
-export function resolveTimeSlotLabel(slot: string): string {
-  return TIME_SLOT_LABELS[slot] ?? slot
-}
+export { resolveTimeSlotLabel } from '@/constants/time-slots'
