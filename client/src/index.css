@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 :root {
-  --color-bg: #f7f4ef;
+  --color-bg: #f3faf7;
   --color-surface: #ffffff;
   --color-ink: #1c1917;
   --color-muted: #78716c;
@@ -9,7 +9,7 @@
   --color-accent-soft: #ccfbf1;
   --color-danger: #b91c1c;
   --color-border: #e7e5e4;
-  --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Figtree', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
 }
 
 *,
@@ -24,11 +24,25 @@ body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background:
-    radial-gradient(circle at top left, #d1fae5 0%, transparent 40%),
-    radial-gradient(circle at top right, #fef3c7 0%, transparent 35%),
-    var(--color-bg);
+    radial-gradient(circle at 12% 8%, #ccfbf1 0%, transparent 32%),
+    radial-gradient(circle at 88% 0%, #fef9c3 0%, transparent 28%),
+    radial-gradient(circle at 70% 100%, #d1fae5 0%, transparent 30%),
+    linear-gradient(160deg, #f8fffc 0%, #f7f4ef 55%, #f5faf7 100%);
+  background-attachment: fixed;
 }
 
 #root {
   min-height: 100vh;
+}
+
+.Toastify__toast {
+  font-family: var(--font-sans);
+}
+
+.Toastify__toast--success {
+  background: #0f766e !important;
+}
+
+.Toastify__toast--error {
+  background: #b91c1c !important;
 }
