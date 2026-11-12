@@ -1,10 +1,10 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Button } from '../../ui/button'
-import { ErrorText } from '../../ui/error-text'
-import { Input } from '../../ui/input'
-import { Label } from '../../ui/label'
-import type { RegisterFormValues } from '../../../lib/auth-schemas'
+import type { RegisterFormValues } from '@/lib/auth-schemas'
+import { Button } from '@/components/ui/button'
+import { ErrorText } from '@/components/ui/error-text'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 type RegisterFormProps = {
   values: RegisterFormValues

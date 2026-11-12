@@ -1,5 +1,5 @@
-import { RegisterForm } from '../components/features/auth/register-form'
-import { useRegister } from '../hooks/use-register'
+import { RegisterForm } from '@/components/features/auth/register-form'
+import { useRegister } from '@/hooks/use-register'
 
 export default function RegisterPage() {
   const {

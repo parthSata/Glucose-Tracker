@@ -1,11 +1,11 @@
 import axios from 'axios'
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { apiClient } from '../lib/api-client'
+import { apiClient } from '@/lib/api-client'
 import {
   registerFormSchema,
   type RegisterFormValues,
-} from '../lib/auth-schemas'
-import { useAuthStore, type AuthUser } from '../store/auth-store'
+} from '@/lib/auth-schemas'
+import { useAuthStore, type AuthUser } from '@/store/auth-store'
 
 type FieldErrors = Partial<Record<keyof RegisterFormValues, string>>
 

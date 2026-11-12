@@ -1,9 +1,9 @@
 import cors from 'cors'
 import express from 'express'
-import { env } from './config/env'
-import { errorMiddleware } from './middleware/error.middleware'
-import { apiRoutes } from './routes'
-import { ApiError } from './utils/api-error'
+import { env } from '@/config/env'
+import { errorMiddleware } from '@/middleware/error.middleware'
+import { apiRoutes } from '@/routes'
+import { ApiError } from '@/utils/api-error'
 
 const app = express()
 

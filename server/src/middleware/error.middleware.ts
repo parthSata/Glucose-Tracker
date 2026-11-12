@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
 import { ZodError } from 'zod'
-import { ApiError } from '../utils/api-error'
-import { env } from '../config/env'
+import { env } from '@/config/env'
+import { ApiError } from '@/utils/api-error'
 
 const TIME_SLOT_LABELS: Record<string, string> = {
   MORNING: 'Morning (fasting)',

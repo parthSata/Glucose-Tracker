@@ -1,8 +1,12 @@
 import { Router } from 'express'
-import { register } from '../controllers/auth.controller'
-import { validateRequest } from '../middleware/validate.middleware'
-import { asyncHandler } from '../utils/async-handler'
-import { registerBodySchema } from '../validators/auth.validators'
+import { login, me, register } from '@/controllers/auth.controller'
+import { authMiddleware } from '@/middleware/auth.middleware'
+import { validateRequest } from '@/middleware/validate.middleware'
+import { asyncHandler } from '@/utils/async-handler'
+import {
+  loginBodySchema,
+  registerBodySchema,
+} from '@/validators/auth.validators'
 
 const authRoutes = Router()
 
@@ -11,5 +15,13 @@ authRoutes.post(
   validateRequest(registerBodySchema),
   asyncHandler(register),
 )
+
+authRoutes.post(
+  '/login',
+  validateRequest(loginBodySchema),
+  asyncHandler(login),
+)
+
+authRoutes.get('/me', authMiddleware, asyncHandler(me))
 
 export { authRoutes }

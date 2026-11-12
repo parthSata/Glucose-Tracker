@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   loginPasswordSchema,
   registerPasswordSchema,
-} from './password-schema'
+} from '@/lib/password-schema'
 
 export const registerFormSchema = z
   .object({

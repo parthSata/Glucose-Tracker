@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   loginPasswordSchema,
   registerPasswordSchema,
-} from './password.validators'
+} from '@/validators/password.validators'
 
 export const registerBodySchema = z.object({
   name: z
