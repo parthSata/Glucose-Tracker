@@ -1,9 +1,13 @@
 import type { Request, Response } from 'express'
 import {
   createReadingForUser,
+  getReadingForUser,
   listReadingsForUser,
 } from '@/services/reading.service'
-import type { CreateReadingBody } from '@/validators/reading.validators'
+import type {
+  CreateReadingBody,
+  ReadingIdParams,
+} from '@/validators/reading.validators'
 import { requireAuthUser } from '@/utils/require-auth-user'
 import { ApiResponse } from '@/utils/api-response'
 
@@ -14,6 +18,16 @@ export async function listReadings(req: Request, res: Response): Promise<void> {
   res
     .status(200)
     .json(new ApiResponse(200, { readings }, 'Readings retrieved successfully.'))
+}
+
+export async function getReading(req: Request, res: Response): Promise<void> {
+  const authUser = requireAuthUser(req)
+  const { id } = req.params as ReadingIdParams
+  const reading = await getReadingForUser(authUser.id, id)
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, { reading }, 'Reading retrieved successfully.'))
 }
 
 export async function createReading(

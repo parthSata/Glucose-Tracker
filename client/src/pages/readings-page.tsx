@@ -1,12 +1,35 @@
+import { useState } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { ReadingDetailModal } from '@/components/features/readings/reading-detail-modal'
 import { ReadingForm } from '@/components/features/readings/reading-form'
 import { ReadingList } from '@/components/features/readings/reading-list'
 import { useCreateReading } from '@/hooks/use-create-reading'
+import { useReadingDetail } from '@/hooks/use-reading-detail'
 import { useReadings } from '@/hooks/use-readings'
+import {
+  DEFAULT_READING_DATE_SORT,
+  sortReadingsByDate,
+  type ReadingDateSort,
+} from '@/lib/sort-readings'
 import { showSuccessToast } from '@/lib/toast'
 
 export default function ReadingsPage() {
   const { readings, isLoading, error, refetch } = useReadings()
+  const [dateSort, setDateSort] = useState<ReadingDateSort>(
+    DEFAULT_READING_DATE_SORT,
+  )
+  const [selectedReadingId, setSelectedReadingId] = useState<string | null>(
+    null,
+  )
+
+  const sortedReadings = sortReadingsByDate(readings, dateSort)
+
+  const {
+    reading: detailReading,
+    isLoading: isDetailLoading,
+    error: detailError,
+    retry: retryDetail,
+  } = useReadingDetail(selectedReadingId)
 
   const {
     values,
@@ -15,6 +38,7 @@ export default function ReadingsPage() {
     isSubmitting,
     maxDate,
     onChange,
+    setFieldValue,
     onSubmit,
   } = useCreateReading({
     onSuccess: (_reading, message) => {
@@ -42,6 +66,7 @@ export default function ReadingsPage() {
               isSubmitting={isSubmitting}
               maxDate={maxDate}
               onChange={onChange}
+              setFieldValue={setFieldValue}
               onSubmit={onSubmit}
             />
           </div>
@@ -53,22 +78,36 @@ export default function ReadingsPage() {
               <h2 className="text-xl font-semibold text-stone-900">
                 Your readings
               </h2>
-              <p className="mt-1 text-sm text-stone-600">Newest dates first.</p>
+              <p className="mt-1 text-sm text-stone-600">
+                Tap a reading to view full details.
+              </p>
             </div>
             <p className="text-sm font-medium text-stone-500">
               {isLoading ? '…' : `${readings.length} saved`}
             </p>
           </div>
           <ReadingList
-            readings={readings}
+            readings={sortedReadings}
             isLoading={isLoading}
             error={error}
+            sort={dateSort}
+            onSortChange={setDateSort}
+            onViewReading={setSelectedReadingId}
             onRetry={() => {
               void refetch()
             }}
           />
         </section>
       </div>
+
+      <ReadingDetailModal
+        open={selectedReadingId !== null}
+        reading={detailReading}
+        isLoading={isDetailLoading}
+        error={detailError}
+        onClose={() => setSelectedReadingId(null)}
+        onRetry={retryDetail}
+      />
     </AppShell>
   )
 }

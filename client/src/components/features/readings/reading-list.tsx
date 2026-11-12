@@ -1,12 +1,20 @@
 import { EmptyState } from '@/components/ui/empty-state'
+import { Dropdown } from '@/components/ui/dropdown'
 import { Spinner } from '@/components/ui/spinner'
 import { ReadingListItem } from '@/components/features/readings/reading-list-item'
+import {
+  READING_DATE_SORT_OPTIONS,
+  type ReadingDateSort,
+} from '@/lib/sort-readings'
 import type { Reading } from '@/types/reading'
 
 type ReadingListProps = {
   readings: Reading[]
   isLoading: boolean
   error: string | null
+  sort: ReadingDateSort
+  onSortChange: (sort: ReadingDateSort) => void
+  onViewReading: (readingId: string) => void
   onRetry: () => void
 }
 
@@ -14,6 +22,9 @@ export function ReadingList({
   readings,
   isLoading,
   error,
+  sort,
+  onSortChange,
+  onViewReading,
   onRetry,
 }: ReadingListProps) {
   if (isLoading) {
@@ -42,17 +53,41 @@ export function ReadingList({
   if (readings.length === 0) {
     return (
       <EmptyState
-        title="No readings yet"
-        description="Add your first glucose reading using the form above."
+        title="No glucose readings found"
+        description="You have not logged any readings yet. Add one with the form to see it listed here."
       />
     )
   }
 
   return (
-    <ul className="space-y-2">
-      {readings.map((reading) => (
-        <ReadingListItem key={reading.id} reading={reading} />
-      ))}
-    </ul>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <label
+          htmlFor="reading-date-sort"
+          className="text-sm font-medium text-stone-700"
+        >
+          Sort by date
+        </label>
+        <Dropdown
+          id="reading-date-sort"
+          value={sort}
+          options={READING_DATE_SORT_OPTIONS}
+          className="sm:max-w-56"
+          onChange={(nextValue) => {
+            onSortChange(nextValue as ReadingDateSort)
+          }}
+        />
+      </div>
+
+      <ul className="space-y-2">
+        {readings.map((reading) => (
+          <ReadingListItem
+            key={reading.id}
+            reading={reading}
+            onView={onViewReading}
+          />
+        ))}
+      </ul>
+    </div>
   )
 }

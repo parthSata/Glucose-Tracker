@@ -52,11 +52,10 @@ export function useCreateReading(options: UseCreateReadingOptions = {}) {
   const [formError, setFormError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function onChange(
-    event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  function setFieldValue(
+    fieldName: keyof CreateReadingFormValues,
+    value: string,
   ) {
-    const { name, value } = event.target
-    const fieldName = name as keyof CreateReadingFormValues
     const nextValues = { ...values, [fieldName]: value }
 
     setValues(nextValues)
@@ -76,6 +75,11 @@ export function useCreateReading(options: UseCreateReadingOptions = {}) {
       ...current,
       [fieldName]: nextErrors[fieldName],
     }))
+  }
+
+  function onChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target
+    setFieldValue(name as keyof CreateReadingFormValues, value)
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -134,6 +138,7 @@ export function useCreateReading(options: UseCreateReadingOptions = {}) {
     isSubmitting,
     maxDate: todayDateOnlyLocal(),
     onChange,
+    setFieldValue,
     onSubmit,
   }
 }

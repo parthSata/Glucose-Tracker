@@ -70,4 +70,12 @@ export const createReadingBodySchema = z.object({
   value: glucoseValueSchema,
 })
 
+export const readingIdParamsSchema = z.object({
+  id: z
+    .string({ error: 'Reading id is required.' })
+    .trim()
+    .uuid('Please provide a valid reading id.'),
+})
+
 export type CreateReadingBody = z.infer<typeof createReadingBodySchema>
+export type ReadingIdParams = z.infer<typeof readingIdParamsSchema>

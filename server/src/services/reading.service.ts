@@ -22,6 +22,21 @@ export async function listReadingsForUser(userId: string) {
   return readings.map(toPublicReading)
 }
 
+export async function getReadingForUser(userId: string, readingId: string) {
+  const reading = await prisma.reading.findFirst({
+    where: {
+      id: readingId,
+      userId,
+    },
+  })
+
+  if (!reading) {
+    throw new ApiError(404, 'Reading not found.')
+  }
+
+  return toPublicReading(reading)
+}
+
 export async function createReadingForUser(
   userId: string,
   input: CreateReadingBody,

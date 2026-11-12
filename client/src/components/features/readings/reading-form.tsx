@@ -2,10 +2,10 @@ import type { ChangeEvent, FormEvent } from 'react'
 import type { CreateReadingFormValues } from '@/lib/reading-schemas'
 import { TIME_SLOT_OPTIONS } from '@/lib/time-slots'
 import { Button } from '@/components/ui/button'
+import { Dropdown } from '@/components/ui/dropdown'
 import { ErrorText } from '@/components/ui/error-text'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
 
 type ReadingFormProps = {
   values: CreateReadingFormValues
@@ -13,8 +13,10 @@ type ReadingFormProps = {
   formError: string | null
   isSubmitting: boolean
   maxDate: string
-  onChange: (
-    event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+  setFieldValue: (
+    fieldName: keyof CreateReadingFormValues,
+    value: string,
   ) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
 }
@@ -26,6 +28,7 @@ export function ReadingForm({
   isSubmitting,
   maxDate,
   onChange,
+  setFieldValue,
   onSubmit,
 }: ReadingFormProps) {
   return (
@@ -60,26 +63,19 @@ export function ReadingForm({
           <Label htmlFor="timeSlot" requiredMark>
             Time slot
           </Label>
-          <Select
+          <Dropdown
             id="timeSlot"
             name="timeSlot"
             value={values.timeSlot}
-            onChange={onChange}
+            placeholder="Select a time slot"
+            options={TIME_SLOT_OPTIONS}
             hasError={Boolean(fieldErrors.timeSlot)}
             aria-invalid={Boolean(fieldErrors.timeSlot)}
             aria-describedby={
               fieldErrors.timeSlot ? 'reading-slot-error' : undefined
             }
-          >
-            <option value="" disabled>
-              Select a time slot
-            </option>
-            {TIME_SLOT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
+            onChange={(nextValue) => setFieldValue('timeSlot', nextValue)}
+          />
           <ErrorText id="reading-slot-error" message={fieldErrors.timeSlot} />
         </div>
 
