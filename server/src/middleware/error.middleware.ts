@@ -11,7 +11,7 @@ const TIME_SLOT_LABELS: Record<string, string> = {
   AFTER_DINNER: 'After dinner',
 }
 
-function duplicateSlotMessage(meta: unknown): string {
+function uniqueConstraintMessage(meta: unknown): string {
   if (
     meta &&
     typeof meta === 'object' &&
@@ -19,6 +19,9 @@ function duplicateSlotMessage(meta: unknown): string {
     Array.isArray((meta as { target: unknown }).target)
   ) {
     const target = (meta as { target: string[] }).target
+    if (target.includes('email')) {
+      return 'An account with this email already exists.'
+    }
     if (
       target.includes('user_id') &&
       target.includes('reading_date') &&
@@ -61,7 +64,7 @@ export function errorMiddleware(
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === 'P2002') {
-      const message = duplicateSlotMessage(err.meta)
+      const message = uniqueConstraintMessage(err.meta)
       res.status(409).json({
         success: false,
         statusCode: 409,
