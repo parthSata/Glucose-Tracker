@@ -26,11 +26,17 @@ model User {
   @@map("users")
 }
 
+/// Blood glucose reading for one user / date / time slot.
+/// DB constraints (beyond Prisma):
+/// - readings_value_range_check: value BETWEEN 40 AND 600
+/// - TimeSlot enum: MORNING | AFTER_BREAKFAST | AFTER_LUNCH | AFTER_DINNER
+/// - UNIQUE (user_id, reading_date, time_slot)
 model Reading {
   id          String   @id @default(uuid())
   userId      String   @map("user_id")
   readingDate DateTime @map("reading_date") @db.Date
   timeSlot    TimeSlot @map("time_slot")
+  /// mg/dl; CHECK (value >= 40 AND value <= 600) in migration
   value       Int
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
