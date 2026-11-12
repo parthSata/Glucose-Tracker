@@ -1,0 +1,15 @@
+{
+  "name": "sweety",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev:server": "bun run --cwd server dev",
+    "dev:client": "bun run --cwd client dev",
+    "typecheck": "bun run --cwd server typecheck && bun run --cwd client typecheck",
+    "lint": "bun run --cwd server lint && bun run --cwd client lint",
+    "db:generate": "bun run --cwd server db:generate",
+    "db:migrate": "bun run --cwd server db:migrate",
+    "db:push": "bun run --cwd server db:push",
+    "db:seed": "bun run --cwd server db:seed"
+  }
+}
