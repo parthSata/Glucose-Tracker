@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { DailyReadingList } from '@/components/features/reports/daily-reading-list'
+import { DailyReadingTable } from '@/components/features/reports/daily-reading-table'
 import { ReportDatePicker } from '@/components/features/reports/report-date-picker'
 import { ReportEmptyState } from '@/components/features/reports/report-empty-state'
+import { ReportErrorState } from '@/components/features/reports/report-error-state'
 import { ReportSummary } from '@/components/features/reports/report-summary'
 import { ReportTypeSwitcher } from '@/components/features/reports/report-type-switcher'
 import { AppShell } from '@/components/layout/app-shell'
-import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDisplayDateRange } from '@/lib/format-display-date'
 import { useReport } from '@/hooks/use-report'
@@ -13,13 +13,20 @@ import type { DailyReport, ReportKind } from '@/types/report'
 
 const REPORT_COPY: Record<
   ReportKind,
-  { eyebrow: string; title: string; description: string; loading: string }
+  {
+    eyebrow: string
+    title: string
+    description: string
+    dateLabel: string
+    loading: string
+  }
 > = {
   daily: {
     eyebrow: 'Daily report',
     title: 'Choose a date',
     description:
-      'Stats and readings are scoped to your account for the selected calendar day.',
+      'Stats and a reading details table for the selected calendar day.',
+    dateLabel: 'Report date',
     loading: 'Loading daily report…',
   },
   'month-to-date': {
@@ -27,6 +34,7 @@ const REPORT_COPY: Record<
     title: 'Choose an end date',
     description:
       'Covers the 1st of that month through your selected date (inclusive).',
+    dateLabel: 'End date',
     loading: 'Loading month-to-date report…',
   },
   monthly: {
@@ -34,6 +42,7 @@ const REPORT_COPY: Record<
     title: 'Choose a reference date',
     description:
       'Shows the entire previous calendar month relative to your selected date (not the current month).',
+    dateLabel: 'Reference date',
     loading: 'Loading monthly report…',
   },
 }
@@ -64,7 +73,7 @@ export default function ReportsPage() {
   return (
     <AppShell
       title="Reports"
-      subtitle="Review highest, lowest, and average glucose for the period you select."
+      subtitle="Switch between daily, month-to-date, and monthly views. Each report shows highest, lowest, average, and total readings."
     >
       <div className="space-y-6">
         <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:p-8">
@@ -80,6 +89,7 @@ export default function ReportsPage() {
           </p>
           <div className="mt-5">
             <ReportDatePicker
+              label={copy.dateLabel}
               value={selectedDate}
               maxDate={maxDate}
               error={dateError}
@@ -92,19 +102,12 @@ export default function ReportsPage() {
           {isLoading ? (
             <Spinner label={copy.loading} />
           ) : error ? (
-            <div className="space-y-3 rounded-xl border border-red-200 bg-red-50/80 px-4 py-6 text-center">
-              <p className="text-sm font-medium text-red-800">{error}</p>
-              <Button
-                type="button"
-                variant="secondary"
-                className="mx-auto max-w-40"
-                onClick={() => {
-                  void refetch()
-                }}
-              >
-                Try again
-              </Button>
-            </div>
+            <ReportErrorState
+              message={error}
+              onRetry={() => {
+                void refetch()
+              }}
+            />
           ) : dateError ? (
             <p className="text-sm text-stone-600">
               Choose a valid date to view the report.
@@ -122,9 +125,9 @@ export default function ReportsPage() {
               {kind === 'daily' ? (
                 <div>
                   <h3 className="mb-4 text-lg font-semibold text-stone-900">
-                    Readings for this day
+                    Reading details
                   </h3>
-                  <DailyReadingList readings={dailyReadings} />
+                  <DailyReadingTable readings={dailyReadings} />
                 </div>
               ) : report.count === 0 ? (
                 <ReportEmptyState />

@@ -117,7 +117,7 @@ Examples:
 - `readings/reading-form.tsx`
 - `readings/reading-list-item.tsx`
 - `reports/report-summary.tsx`
-- `reports/daily-reading-list.tsx`
+- `reports/daily-reading-table.tsx`
 
 ## Pages
 

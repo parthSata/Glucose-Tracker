@@ -17,7 +17,7 @@ export function ReportTypeSwitcher({
 }: ReportTypeSwitcherProps) {
   return (
     <div
-      className="inline-flex flex-wrap gap-1 rounded-xl border border-stone-200 bg-stone-50 p-1"
+      className="flex w-full flex-col gap-1 rounded-xl border border-stone-200 bg-stone-50 p-1 sm:inline-flex sm:w-auto sm:flex-row sm:flex-wrap"
       role="tablist"
       aria-label="Report type"
     >
@@ -30,7 +30,7 @@ export function ReportTypeSwitcher({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(option.value)}
-            className={`min-h-11 rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 ${
+            className={`min-h-11 rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:flex-none ${
               isActive
                 ? 'bg-teal-700 text-white'
                 : 'text-stone-700 hover:bg-white hover:text-teal-900'
