@@ -45,4 +45,5 @@ context/progress-tracker.md
 # Misc
 .turbo/
 .cache/
+.chrome-temp/
 *.local
