@@ -1,109 +1,89 @@
-import { Link } from 'react-router-dom'
+import { DashboardAddAction } from '@/components/features/dashboard/dashboard-add-action'
+import { DashboardStats } from '@/components/features/dashboard/dashboard-stats'
+import { DashboardTodayList } from '@/components/features/dashboard/dashboard-today-list'
+import { DashboardWelcome } from '@/components/features/dashboard/dashboard-welcome'
 import { AppShell } from '@/components/layout/app-shell'
-import { TIME_SLOT_OPTIONS } from '@/lib/time-slots'
-import { useAuthStore } from '@/store/auth-store'
+import { EmptyState } from '@/components/ui/empty-state'
+import { useDashboard } from '@/hooks/use-dashboard'
 
 export default function DashboardPage() {
-  const user = useAuthStore((state) => state.user)
+  const {
+    userName,
+    todayDateLabel,
+    todayReadings,
+    todayStats,
+    completionCount,
+    completionMax,
+    totalReadings,
+    hasAnyReadings,
+    isLoading,
+    error,
+    refetch,
+  } = useDashboard()
 
   return (
     <AppShell
       title="Dashboard"
-      subtitle={`Welcome${user?.name ? `, ${user.name}` : ''}. Track up to four glucose readings each day.`}
+      subtitle="Today’s readings and a quick look at your glucose overview."
     >
-      <div className="grid gap-6 lg:grid-cols-12">
-        <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:col-span-7 lg:p-8">
-          <p className="text-sm font-semibold tracking-wide text-teal-800 uppercase">
-            Your account
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-stone-900">
-            Ready when you are
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600 sm:text-base">
-            You are signed in
-            {user?.email ? (
-              <>
-                {' '}
-                as{' '}
-                <span className="font-medium text-stone-800">{user.email}</span>
-              </>
+      <div className="space-y-6">
+        <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:p-8">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <DashboardWelcome
+              userName={userName}
+              dateLabel={todayDateLabel}
+            />
+            <DashboardAddAction className="w-full sm:w-auto sm:shrink-0" />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold tracking-wide text-stone-500 uppercase">
+            Quick stats
+          </h3>
+          <DashboardStats
+            completionCount={completionCount}
+            completionMax={completionMax}
+            todayStats={todayStats}
+            totalReadings={totalReadings}
+          />
+        </section>
+
+        <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:p-8">
+          <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-stone-900">
+                Today’s readings
+              </h3>
+              <p className="mt-1 text-sm text-stone-600">
+                Up to four slots: morning fasting through after dinner.
+              </p>
+            </div>
+            {!isLoading && !error ? (
+              <p className="text-sm font-medium text-stone-500">
+                {completionCount} of {completionMax} logged
+              </p>
             ) : null}
-            . Log readings by time slot, then review them anytime from the
-            Readings page.
-          </p>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/readings"
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-            >
-              Add reading
-            </Link>
-            <Link
-              to="/readings"
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-800 transition hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400"
-            >
-              View readings
-            </Link>
           </div>
-        </section>
 
-        <section className="rounded-2xl border border-teal-200/70 bg-teal-50/70 p-6 shadow-sm lg:col-span-5 lg:p-8">
-          <p className="text-sm font-semibold tracking-wide text-teal-900 uppercase">
-            Daily limit
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-teal-950">
-            4 slots per day
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-teal-900/80">
-            One reading for each time of day. Values are recorded in mg/dl.
-          </p>
-          <ul className="mt-6 space-y-3">
-            {TIME_SLOT_OPTIONS.map((slot, index) => (
-              <li
-                key={slot.value}
-                className="flex items-center gap-3 rounded-xl border border-teal-200/80 bg-white/80 px-3 py-2.5"
-              >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-xs font-semibold text-white">
-                  {index + 1}
-                </span>
-                <span className="text-sm font-medium text-stone-800">
-                  {slot.label}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:col-span-12 lg:p-8">
-          <div className="grid gap-6 md:grid-cols-3">
-            <div>
-              <h3 className="text-base font-semibold text-stone-900">
-                Log by slot
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                Pick a date, choose a time slot, and enter your glucose value.
-              </p>
+          {!isLoading && !error && !hasAnyReadings ? (
+            <div className="space-y-4">
+              <EmptyState
+                title="No glucose readings yet"
+                description="Start recording your readings to see today’s list and your stats here."
+              />
+              <DashboardAddAction className="w-full sm:mx-auto sm:max-w-56" />
             </div>
-            <div>
-              <h3 className="text-base font-semibold text-stone-900">
-                Stay consistent
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                Only one entry per slot per day keeps your history clean and
-                reliable.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-stone-900">
-                Review later
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                Open Readings anytime to see what you have recorded, newest
-                first.
-              </p>
-            </div>
-          </div>
+          ) : (
+            <DashboardTodayList
+              readings={todayReadings}
+              isLoading={isLoading}
+              error={error}
+              onRetry={() => {
+                void refetch()
+              }}
+            />
+          )}
         </section>
       </div>
     </AppShell>
