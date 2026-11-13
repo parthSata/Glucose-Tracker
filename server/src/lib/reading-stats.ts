@@ -3,10 +3,13 @@ import { TIME_SLOTS, type TimeSlotValue } from '@/constants/time-slots'
 import { formatDateOnlyUtc } from '@/lib/date-only'
 
 export type ReadingStats = {
+  /** Total = number of readings. */
   count: number
+  /** Highest = maximum reading, or null when empty (never divide / invent). */
   highest: number | null
+  /** Lowest = minimum reading, or null when empty. */
   lowest: number | null
-  /** Rounded to 1 decimal, or null when empty. */
+  /** Average = sum ÷ count, rounded to 1 decimal; null when count is 0. */
   average: number | null
 }
 
@@ -21,9 +24,16 @@ const SLOT_ORDER = Object.fromEntries(
   TIME_SLOTS.map((slot, index) => [slot, index]),
 ) as Record<TimeSlotValue, number>
 
-export function computeReadingStats(
-  values: number[],
-): ReadingStats {
+/** Round to one decimal place without floating-point surprises. */
+export function roundAverageToOneDecimal(sum: number, count: number): number {
+  return Number((sum / count).toFixed(1))
+}
+
+/**
+ * Report statistics for a set of glucose values.
+ * Empty input → count 0 and null stats (does not divide by zero).
+ */
+export function computeReadingStats(values: number[]): ReadingStats {
   if (values.length === 0) {
     return {
       count: 0,
@@ -33,13 +43,14 @@ export function computeReadingStats(
     }
   }
 
+  const count = values.length
   const sum = values.reduce((total, value) => total + value, 0)
 
   return {
-    count: values.length,
+    count,
     highest: Math.max(...values),
     lowest: Math.min(...values),
-    average: Math.round((sum / values.length) * 10) / 10,
+    average: roundAverageToOneDecimal(sum, count),
   }
 }
 

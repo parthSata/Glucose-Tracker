@@ -5,8 +5,21 @@ import {
   computeReadingStats,
   sortReadingsBySlot,
   toReportReadingItem,
+  type ReportReadingItem,
 } from '@/lib/reading-stats'
 
+type ReportSummaryPayload = {
+  range: { start: string; end: string }
+  highest: number | null
+  lowest: number | null
+  average: number | null
+  count: number
+}
+
+/**
+ * Inclusive calendar-date query, always scoped to the authenticated user.
+ * Boundaries use date-only UTC midnight so days are not shifted by TZ.
+ */
 async function getReadingsInRange(
   userId: string,
   startDateOnly: string,
@@ -24,21 +37,33 @@ async function getReadingsInRange(
   })
 }
 
-export async function getDailyReportForUser(userId: string, dateOnly: string) {
-  const readings = await getReadingsInRange(userId, dateOnly, dateOnly)
-  const ordered = sortReadingsBySlot(readings)
-  const stats = computeReadingStats(ordered.map((reading) => reading.value))
+function toSummaryPayload(
+  range: { start: string; end: string },
+  values: number[],
+): ReportSummaryPayload {
+  const stats = computeReadingStats(values)
 
   return {
-    range: {
-      start: dateOnly,
-      end: dateOnly,
-    },
+    range,
     highest: stats.highest,
     lowest: stats.lowest,
     average: stats.average,
     count: stats.count,
-    readings: ordered.map(toReportReadingItem),
+  }
+}
+
+export async function getDailyReportForUser(userId: string, dateOnly: string) {
+  const readings = await getReadingsInRange(userId, dateOnly, dateOnly)
+  const ordered = sortReadingsBySlot(readings)
+  const summary = toSummaryPayload(
+    { start: dateOnly, end: dateOnly },
+    ordered.map((reading) => reading.value),
+  )
+  const reportReadings: ReportReadingItem[] = ordered.map(toReportReadingItem)
+
+  return {
+    ...summary,
+    readings: reportReadings,
   }
 }
 
@@ -48,15 +73,11 @@ export async function getMonthToDateReportForUser(
 ) {
   const range = monthToDateRange(dateOnly)
   const readings = await getReadingsInRange(userId, range.start, range.end)
-  const stats = computeReadingStats(readings.map((reading) => reading.value))
 
-  return {
+  return toSummaryPayload(
     range,
-    highest: stats.highest,
-    lowest: stats.lowest,
-    average: stats.average,
-    count: stats.count,
-  }
+    readings.map((reading) => reading.value),
+  )
 }
 
 export async function getMonthlyReportForUser(
@@ -65,13 +86,9 @@ export async function getMonthlyReportForUser(
 ) {
   const range = previousMonthRange(dateOnly)
   const readings = await getReadingsInRange(userId, range.start, range.end)
-  const stats = computeReadingStats(readings.map((reading) => reading.value))
 
-  return {
+  return toSummaryPayload(
     range,
-    highest: stats.highest,
-    lowest: stats.lowest,
-    average: stats.average,
-    count: stats.count,
-  }
+    readings.map((reading) => reading.value),
+  )
 }

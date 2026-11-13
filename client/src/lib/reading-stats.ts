@@ -27,6 +27,15 @@ export function sortReadingsBySlot(readings: Reading[]): Reading[] {
   )
 }
 
+/** Round to one decimal place (matches server report average). */
+export function roundAverageToOneDecimal(sum: number, count: number): number {
+  return Number((sum / count).toFixed(1))
+}
+
+/**
+ * Dashboard / client-side stats. Empty → count 0 and null averages
+ * (never divides by zero).
+ */
 export function computeReadingStats(readings: Reading[]): ReadingStats {
   if (readings.length === 0) {
     return {
@@ -38,13 +47,14 @@ export function computeReadingStats(readings: Reading[]): ReadingStats {
   }
 
   const values = readings.map((reading) => reading.value)
+  const count = values.length
   const sum = values.reduce((total, value) => total + value, 0)
 
   return {
-    count: readings.length,
+    count,
     highest: Math.max(...values),
     lowest: Math.min(...values),
-    average: Math.round((sum / values.length) * 10) / 10,
+    average: roundAverageToOneDecimal(sum, count),
   }
 }
 
