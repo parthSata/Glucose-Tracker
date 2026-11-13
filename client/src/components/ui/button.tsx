@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary'
+  variant?: 'primary' | 'secondary' | 'danger'
 }
 
 export function Button({
@@ -19,6 +19,8 @@ export function Button({
       'bg-teal-700 text-white hover:bg-teal-800 focus-visible:outline-teal-700',
     secondary:
       'border border-stone-300 bg-white text-stone-800 hover:bg-stone-50 focus-visible:outline-stone-400',
+    danger:
+      'bg-red-700 text-white hover:bg-red-800 focus-visible:outline-red-700',
   }
 
   return (

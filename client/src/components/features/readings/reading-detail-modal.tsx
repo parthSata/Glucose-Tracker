@@ -1,6 +1,8 @@
-import { Button } from '@/components/ui/button'
+import { IconButton } from '@/components/ui/icon-button'
 import { Modal } from '@/components/ui/modal'
+import { PencilIcon } from '@/components/ui/pencil-icon'
 import { Spinner } from '@/components/ui/spinner'
+import { TrashIcon } from '@/components/ui/trash-icon'
 import { formatDateTime } from '@/lib/format-datetime'
 import { resolveTimeSlotLabel } from '@/lib/time-slots'
 import type { Reading } from '@/types/reading'
@@ -13,6 +15,7 @@ type ReadingDetailModalProps = {
   onClose: () => void
   onRetry: () => void
   onEdit: (reading: Reading) => void
+  onDelete: (reading: Reading) => void
 }
 
 export function ReadingDetailModal({
@@ -23,6 +26,7 @@ export function ReadingDetailModal({
   onClose,
   onRetry,
   onEdit,
+  onDelete,
 }: ReadingDetailModalProps) {
   return (
     <Modal open={open} title="Reading details" onClose={onClose}>
@@ -94,14 +98,26 @@ export function ReadingDetailModal({
             </div>
           </dl>
 
-          <Button
-            type="button"
-            onClick={() => {
-              onEdit(reading)
-            }}
-          >
-            Edit reading
-          </Button>
+          <div className="flex items-center gap-2">
+            <IconButton
+              label="Edit reading"
+              variant="primary"
+              onClick={() => {
+                onEdit(reading)
+              }}
+            >
+              <PencilIcon />
+            </IconButton>
+            <IconButton
+              label="Delete reading"
+              variant="danger"
+              onClick={() => {
+                onDelete(reading)
+              }}
+            >
+              <TrashIcon />
+            </IconButton>
+          </div>
         </div>
       ) : null}
     </Modal>

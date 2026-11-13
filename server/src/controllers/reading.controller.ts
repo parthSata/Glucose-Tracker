@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import {
   createReadingForUser,
+  deleteReadingForUser,
   getReadingForUser,
   listReadingsForUser,
   updateReadingForUser,
@@ -57,4 +58,17 @@ export async function updateReading(
   res
     .status(200)
     .json(new ApiResponse(200, { reading }, 'Reading updated successfully.'))
+}
+
+export async function deleteReading(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const authUser = requireAuthUser(req)
+  const { id } = req.params as ReadingIdParams
+  await deleteReadingForUser(authUser.id, id)
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Reading deleted successfully.'))
 }

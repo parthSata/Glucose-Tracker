@@ -1,16 +1,22 @@
-import type { Reading } from '@/types/reading'
+import { EyeIcon } from '@/components/ui/eye-icon'
+import { IconButton } from '@/components/ui/icon-button'
+import { PencilIcon } from '@/components/ui/pencil-icon'
+import { TrashIcon } from '@/components/ui/trash-icon'
 import { resolveTimeSlotLabel } from '@/lib/time-slots'
+import type { Reading } from '@/types/reading'
 
 type ReadingListItemProps = {
   reading: Reading
   onView: (readingId: string) => void
   onEdit: (reading: Reading) => void
+  onDelete: (reading: Reading) => void
 }
 
 export function ReadingListItem({
   reading,
   onView,
   onEdit,
+  onDelete,
 }: ReadingListItemProps) {
   return (
     <li className="rounded-xl border border-stone-200/80 bg-gradient-to-r from-white to-teal-50/40 px-4 py-3.5">
@@ -32,21 +38,24 @@ export function ReadingListItem({
           </p>
         </button>
 
-        <div className="flex gap-2 sm:flex-col sm:items-stretch lg:flex-row">
-          <button
-            type="button"
-            onClick={() => onView(reading.id)}
-            className="min-h-10 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50"
-          >
-            View
-          </button>
-          <button
-            type="button"
+        <div className="flex items-center gap-2">
+          <IconButton label="View reading" onClick={() => onView(reading.id)}>
+            <EyeIcon />
+          </IconButton>
+          <IconButton
+            label="Edit reading"
+            variant="primary"
             onClick={() => onEdit(reading)}
-            className="min-h-10 flex-1 rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800"
           >
-            Edit
-          </button>
+            <PencilIcon />
+          </IconButton>
+          <IconButton
+            label="Delete reading"
+            variant="danger"
+            onClick={() => onDelete(reading)}
+          >
+            <TrashIcon />
+          </IconButton>
         </div>
       </div>
     </li>

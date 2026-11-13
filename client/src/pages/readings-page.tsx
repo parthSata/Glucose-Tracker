@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
+import { ReadingDeleteDialog } from '@/components/features/readings/reading-delete-dialog'
 import { ReadingDetailModal } from '@/components/features/readings/reading-detail-modal'
 import { ReadingEditModal } from '@/components/features/readings/reading-edit-modal'
 import { ReadingForm } from '@/components/features/readings/reading-form'
 import { ReadingList } from '@/components/features/readings/reading-list'
 import { useCreateReading } from '@/hooks/use-create-reading'
+import { useDeleteReading } from '@/hooks/use-delete-reading'
 import { useReadingDetail } from '@/hooks/use-reading-detail'
 import { useReadings } from '@/hooks/use-readings'
 import {
@@ -24,6 +26,7 @@ export default function ReadingsPage() {
     null,
   )
   const [editingReading, setEditingReading] = useState<Reading | null>(null)
+  const [deletingReading, setDeletingReading] = useState<Reading | null>(null)
 
   const sortedReadings = sortReadingsByDate(readings, dateSort)
 
@@ -33,6 +36,15 @@ export default function ReadingsPage() {
     error: detailError,
     retry: retryDetail,
   } = useReadingDetail(selectedReadingId)
+
+  const { isDeleting, deleteReading } = useDeleteReading({
+    onSuccess: () => {
+      setDeletingReading(null)
+      setSelectedReadingId(null)
+      setEditingReading(null)
+      void refetch()
+    },
+  })
 
   const {
     values,
@@ -52,7 +64,14 @@ export default function ReadingsPage() {
 
   function openEdit(reading: Reading) {
     setSelectedReadingId(null)
+    setDeletingReading(null)
     setEditingReading(reading)
+  }
+
+  function openDelete(reading: Reading) {
+    setSelectedReadingId(null)
+    setEditingReading(null)
+    setDeletingReading(reading)
   }
 
   return (
@@ -87,7 +106,7 @@ export default function ReadingsPage() {
                 Your readings
               </h2>
               <p className="mt-1 text-sm text-stone-600">
-                View details or edit any reading.
+                Use the icons to view, edit, or delete a reading.
               </p>
             </div>
             <p className="text-sm font-medium text-stone-500">
@@ -102,6 +121,7 @@ export default function ReadingsPage() {
             onSortChange={setDateSort}
             onViewReading={setSelectedReadingId}
             onEditReading={openEdit}
+            onDeleteReading={openDelete}
             onRetry={() => {
               void refetch()
             }}
@@ -117,6 +137,7 @@ export default function ReadingsPage() {
         onClose={() => setSelectedReadingId(null)}
         onRetry={retryDetail}
         onEdit={openEdit}
+        onDelete={openDelete}
       />
 
       <ReadingEditModal
@@ -127,6 +148,19 @@ export default function ReadingsPage() {
           showSuccessToast(message)
           setEditingReading(null)
           void refetch()
+        }}
+      />
+
+      <ReadingDeleteDialog
+        open={deletingReading !== null}
+        reading={deletingReading}
+        isDeleting={isDeleting}
+        onCancel={() => setDeletingReading(null)}
+        onConfirm={() => {
+          if (!deletingReading) {
+            return
+          }
+          void deleteReading(deletingReading.id)
         }}
       />
     </AppShell>

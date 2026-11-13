@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
   createReading,
+  deleteReading,
   getReading,
   listReadings,
   updateReading,
@@ -37,6 +38,12 @@ readingsRoutes.put(
   validateRequest(readingIdParamsSchema, 'params'),
   validateRequest(updateReadingBodySchema),
   asyncHandler(updateReading),
+)
+
+readingsRoutes.delete(
+  '/:id',
+  validateRequest(readingIdParamsSchema, 'params'),
+  asyncHandler(deleteReading),
 )
 
 export { readingsRoutes }

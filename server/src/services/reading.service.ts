@@ -158,3 +158,21 @@ export async function updateReadingForUser(
     throw error
   }
 }
+
+export async function deleteReadingForUser(userId: string, readingId: string) {
+  const existing = await prisma.reading.findFirst({
+    where: {
+      id: readingId,
+      userId,
+    },
+    select: { id: true },
+  })
+
+  if (!existing) {
+    throw new ApiError(404, 'Reading not found.')
+  }
+
+  await prisma.reading.delete({
+    where: { id: readingId },
+  })
+}

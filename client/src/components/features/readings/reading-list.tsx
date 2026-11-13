@@ -16,6 +16,7 @@ type ReadingListProps = {
   onSortChange: (sort: ReadingDateSort) => void
   onViewReading: (readingId: string) => void
   onEditReading: (reading: Reading) => void
+  onDeleteReading: (reading: Reading) => void
   onRetry: () => void
 }
 
@@ -27,6 +28,7 @@ export function ReadingList({
   onSortChange,
   onViewReading,
   onEditReading,
+  onDeleteReading,
   onRetry,
 }: ReadingListProps) {
   if (isLoading) {
@@ -88,6 +90,7 @@ export function ReadingList({
             reading={reading}
             onView={onViewReading}
             onEdit={onEditReading}
+            onDelete={onDeleteReading}
           />
         ))}
       </ul>
