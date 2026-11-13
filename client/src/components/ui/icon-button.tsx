@@ -30,7 +30,7 @@ export function IconButton({
       title={label}
       aria-label={label}
       disabled={disabled}
-      className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`.trim()}
+      className={`inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`.trim()}
       {...props}
     >
       {children}

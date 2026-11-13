@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { ReadingDeleteDialog } from '@/components/features/readings/reading-delete-dialog'
 import { ReadingDetailModal } from '@/components/features/readings/reading-detail-modal'
@@ -9,6 +9,12 @@ import { useCreateReading } from '@/hooks/use-create-reading'
 import { useDeleteReading } from '@/hooks/use-delete-reading'
 import { useReadingDetail } from '@/hooks/use-reading-detail'
 import { useReadings } from '@/hooks/use-readings'
+import {
+  clampPage,
+  getTotalPages,
+  paginateItems,
+  READINGS_PAGE_SIZE,
+} from '@/lib/paginate'
 import {
   DEFAULT_READING_DATE_SORT,
   sortReadingsByDate,
@@ -22,6 +28,7 @@ export default function ReadingsPage() {
   const [dateSort, setDateSort] = useState<ReadingDateSort>(
     DEFAULT_READING_DATE_SORT,
   )
+  const [page, setPage] = useState(1)
   const [selectedReadingId, setSelectedReadingId] = useState<string | null>(
     null,
   )
@@ -29,6 +36,20 @@ export default function ReadingsPage() {
   const [deletingReading, setDeletingReading] = useState<Reading | null>(null)
 
   const sortedReadings = sortReadingsByDate(readings, dateSort)
+  const totalItems = sortedReadings.length
+  const totalPages = getTotalPages(totalItems, READINGS_PAGE_SIZE)
+  const safePage = clampPage(page, totalPages)
+  const pageReadings = paginateItems(
+    sortedReadings,
+    safePage,
+    READINGS_PAGE_SIZE,
+  )
+
+  useEffect(() => {
+    if (page !== safePage) {
+      setPage(safePage)
+    }
+  }, [page, safePage])
 
   const {
     reading: detailReading,
@@ -59,6 +80,7 @@ export default function ReadingsPage() {
     readings,
     onSuccess: (_reading, message) => {
       showSuccessToast(message)
+      setPage(1)
       void refetch()
     },
   })
@@ -75,18 +97,30 @@ export default function ReadingsPage() {
     setDeletingReading(reading)
   }
 
+  function handleSortChange(nextSort: ReadingDateSort) {
+    setDateSort(nextSort)
+    setPage(1)
+  }
+
   return (
     <AppShell
       title="Readings"
       subtitle="Log up to four glucose readings per day. Values use mg/dl."
     >
       <div className="grid items-start gap-6 lg:grid-cols-12">
-        <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:col-span-5 lg:p-8">
-          <h2 className="text-xl font-semibold text-stone-900">Add reading</h2>
-          <p className="mt-1 text-sm text-stone-600">
-            Choose a date, time slot, and glucose value.
-          </p>
-          <div className="mt-5">
+        <section className="overflow-hidden rounded-2xl border border-teal-200/60 bg-white/95 shadow-sm lg:col-span-5">
+          <div className="border-b border-teal-100 bg-gradient-to-r from-teal-700 to-emerald-600 px-6 py-5 text-white lg:px-8">
+            <p className="text-xs font-semibold tracking-[0.16em] uppercase opacity-90">
+              New entry
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight">
+              Add reading
+            </h2>
+            <p className="mt-1.5 text-sm text-teal-50/90">
+              Date, time slot, and glucose value in mg/dl.
+            </p>
+          </div>
+          <div className="p-6 lg:p-8">
             <ReadingForm
               values={values}
               fieldErrors={fieldErrors}
@@ -100,33 +134,43 @@ export default function ReadingsPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:col-span-7 lg:p-8">
-          <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <section className="overflow-hidden rounded-2xl border border-stone-200/80 bg-white/95 shadow-sm lg:col-span-7">
+          <div className="flex flex-col gap-3 border-b border-stone-100 bg-gradient-to-r from-stone-50 to-teal-50/40 px-6 py-5 sm:flex-row sm:items-center sm:justify-between lg:px-8">
             <div>
-              <h2 className="text-xl font-semibold text-stone-900">
+              <p className="text-xs font-semibold tracking-[0.16em] text-teal-800 uppercase">
+                History
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
                 Your readings
               </h2>
               <p className="mt-1 text-sm text-stone-600">
-                Use the icons to view, edit, or delete a reading.
+                Browse, edit, or remove logged values.
               </p>
             </div>
-            <p className="text-sm font-medium text-stone-500">
-              {isLoading ? '…' : `${readings.length} saved`}
-            </p>
+            <span className="inline-flex w-fit items-center rounded-full bg-teal-700 px-3 py-1.5 text-xs font-bold tracking-wide text-white shadow-sm">
+              {isLoading ? '…' : `${totalItems} saved`}
+            </span>
           </div>
-          <ReadingList
-            readings={sortedReadings}
-            isLoading={isLoading}
-            error={error}
-            sort={dateSort}
-            onSortChange={setDateSort}
-            onViewReading={setSelectedReadingId}
-            onEditReading={openEdit}
-            onDeleteReading={openDelete}
-            onRetry={() => {
-              void refetch()
-            }}
-          />
+          <div className="p-6 lg:p-8">
+            <ReadingList
+              readings={pageReadings}
+              isLoading={isLoading}
+              error={error}
+              sort={dateSort}
+              page={safePage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={READINGS_PAGE_SIZE}
+              onSortChange={handleSortChange}
+              onPageChange={setPage}
+              onViewReading={setSelectedReadingId}
+              onEditReading={openEdit}
+              onDeleteReading={openDelete}
+              onRetry={() => {
+                void refetch()
+              }}
+            />
+          </div>
         </section>
       </div>
 

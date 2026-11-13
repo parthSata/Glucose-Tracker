@@ -30,7 +30,7 @@ export function ReportTypeSwitcher({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(option.value)}
-            className={`min-h-11 rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:flex-none ${
+            className={`min-h-11 cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:flex-none ${
               isActive
                 ? 'bg-teal-700 text-white'
                 : 'text-stone-700 hover:bg-white hover:text-teal-900'

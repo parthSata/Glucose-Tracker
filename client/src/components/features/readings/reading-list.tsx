@@ -1,11 +1,9 @@
 import { EmptyState } from '@/components/ui/empty-state'
-import { Dropdown } from '@/components/ui/dropdown'
+import { Pagination } from '@/components/ui/pagination'
 import { Spinner } from '@/components/ui/spinner'
 import { ReadingListItem } from '@/components/features/readings/reading-list-item'
-import {
-  READING_DATE_SORT_OPTIONS,
-  type ReadingDateSort,
-} from '@/lib/sort-readings'
+import { ReadingSortToggle } from '@/components/features/readings/reading-sort-toggle'
+import type { ReadingDateSort } from '@/lib/sort-readings'
 import type { Reading } from '@/types/reading'
 
 type ReadingListProps = {
@@ -13,7 +11,12 @@ type ReadingListProps = {
   isLoading: boolean
   error: string | null
   sort: ReadingDateSort
+  page: number
+  totalPages: number
+  totalItems: number
+  pageSize: number
   onSortChange: (sort: ReadingDateSort) => void
+  onPageChange: (page: number) => void
   onViewReading: (readingId: string) => void
   onEditReading: (reading: Reading) => void
   onDeleteReading: (reading: Reading) => void
@@ -25,7 +28,12 @@ export function ReadingList({
   isLoading,
   error,
   sort,
+  page,
+  totalPages,
+  totalItems,
+  pageSize,
   onSortChange,
+  onPageChange,
   onViewReading,
   onEditReading,
   onDeleteReading,
@@ -54,7 +62,7 @@ export function ReadingList({
     )
   }
 
-  if (readings.length === 0) {
+  if (totalItems === 0) {
     return (
       <EmptyState
         title="No glucose readings found"
@@ -65,25 +73,14 @@ export function ReadingList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <label
-          htmlFor="reading-date-sort"
-          className="text-sm font-medium text-stone-700"
-        >
-          Sort by date
-        </label>
-        <Dropdown
-          id="reading-date-sort"
-          value={sort}
-          options={READING_DATE_SORT_OPTIONS}
-          className="sm:max-w-56"
-          onChange={(nextValue) => {
-            onSortChange(nextValue as ReadingDateSort)
-          }}
-        />
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-stone-200/70 bg-white/70 px-3 py-2.5">
+        <p className="text-xs font-semibold tracking-wide text-stone-500 uppercase">
+          Order by date
+        </p>
+        <ReadingSortToggle value={sort} onChange={onSortChange} />
       </div>
 
-      <ul className="space-y-2">
+      <ul className="space-y-3">
         {readings.map((reading) => (
           <ReadingListItem
             key={reading.id}
@@ -94,6 +91,14 @@ export function ReadingList({
           />
         ))}
       </ul>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageChange={onPageChange}
+      />
     </div>
   )
 }

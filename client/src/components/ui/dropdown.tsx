@@ -160,7 +160,7 @@ export function Dropdown({
           openMenu()
         }}
         onKeyDown={onTriggerKeyDown}
-        className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3 py-2 text-left text-sm text-stone-900 shadow-sm outline-none transition focus:ring-2 ${
+        className={`flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 rounded-lg border bg-white px-3 py-2 text-left text-sm text-stone-900 shadow-sm outline-none transition focus:ring-2 ${
           hasError
             ? 'border-red-500 focus:border-red-500 focus:ring-red-200'
             : open
@@ -214,7 +214,7 @@ export function Dropdown({
                     }
                   }}
                   onClick={() => selectOption(option)}
-                  className={`flex w-full rounded-lg px-3 py-2.5 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                  className={`flex w-full cursor-pointer rounded-lg px-3 py-2.5 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-50 ${
                     isActive
                       ? 'bg-teal-700 text-white'
                       : isSelected
