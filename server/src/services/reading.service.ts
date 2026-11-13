@@ -12,8 +12,23 @@ import type {
 } from '@/validators/reading.validators'
 import { ApiError } from '@/utils/api-error'
 
+const MAX_READINGS_PER_DAY_MESSAGE = 'You can add only 4 readings per day.'
+
 function duplicateSlotMessage(timeSlot: string): string {
   return `You already have an ${resolveTimeSlotLabel(timeSlot)} reading for this date.`
+}
+
+function throwMaxReadingsPerDay(): never {
+  throw new ApiError(400, MAX_READINGS_PER_DAY_MESSAGE, {
+    readingDate: [MAX_READINGS_PER_DAY_MESSAGE],
+  })
+}
+
+function throwDuplicateSlot(timeSlot: string): never {
+  const message = duplicateSlotMessage(timeSlot)
+  throw new ApiError(409, message, {
+    timeSlot: [message],
+  })
 }
 
 export async function listReadingsForUser(userId: string) {
@@ -54,7 +69,7 @@ export async function createReadingForUser(
   })
 
   if (countForDay >= MAX_READINGS_PER_DAY) {
-    throw new ApiError(400, 'You can add only 4 readings per day.')
+    throwMaxReadingsPerDay()
   }
 
   const existingSlot = await prisma.reading.findFirst({
@@ -67,7 +82,7 @@ export async function createReadingForUser(
   })
 
   if (existingSlot) {
-    throw new ApiError(409, duplicateSlotMessage(input.timeSlot))
+    throwDuplicateSlot(input.timeSlot)
   }
 
   try {
@@ -86,7 +101,7 @@ export async function createReadingForUser(
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
-      throw new ApiError(409, duplicateSlotMessage(input.timeSlot))
+      throwDuplicateSlot(input.timeSlot)
     }
     throw error
   }
@@ -120,7 +135,7 @@ export async function updateReadingForUser(
   })
 
   if (otherReadingsThatDay >= MAX_READINGS_PER_DAY) {
-    throw new ApiError(400, 'You can add only 4 readings per day.')
+    throwMaxReadingsPerDay()
   }
 
   const slotConflict = await prisma.reading.findFirst({
@@ -134,7 +149,7 @@ export async function updateReadingForUser(
   })
 
   if (slotConflict) {
-    throw new ApiError(409, duplicateSlotMessage(input.timeSlot))
+    throwDuplicateSlot(input.timeSlot)
   }
 
   try {
@@ -153,7 +168,7 @@ export async function updateReadingForUser(
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === 'P2002'
     ) {
-      throw new ApiError(409, duplicateSlotMessage(input.timeSlot))
+      throwDuplicateSlot(input.timeSlot)
     }
     throw error
   }

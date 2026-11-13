@@ -6,6 +6,7 @@ import type { Reading } from '@/types/reading'
 type ReadingEditModalProps = {
   open: boolean
   reading: Reading | null
+  readings: Reading[]
   onClose: () => void
   onUpdated: (reading: Reading, message: string) => void
 }
@@ -13,6 +14,7 @@ type ReadingEditModalProps = {
 export function ReadingEditModal({
   open,
   reading,
+  readings,
   onClose,
   onUpdated,
 }: ReadingEditModalProps) {
@@ -27,6 +29,7 @@ export function ReadingEditModal({
     onSubmit,
   } = useEditReading({
     reading: open ? reading : null,
+    readings,
     onSuccess: onUpdated,
   })
 

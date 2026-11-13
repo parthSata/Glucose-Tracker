@@ -2,9 +2,22 @@ import type { NextFunction, Request, Response } from 'express'
 import { Prisma } from '@prisma/client'
 import { ZodError } from 'zod'
 import { env } from '@/config/env'
+import { resolveTimeSlotLabel } from '@/constants/time-slots'
 import { ApiError } from '@/utils/api-error'
 
-function uniqueConstraintMessage(meta: unknown): string {
+function isReadingUniqueTarget(target: string[]): boolean {
+  return (
+    (target.includes('user_id') || target.includes('userId')) &&
+    (target.includes('reading_date') || target.includes('readingDate')) &&
+    (target.includes('time_slot') || target.includes('timeSlot'))
+  )
+}
+
+/**
+ * Fallback for P2002 that escaped the service layer.
+ * Prefer the service's slot-labeled message; use body.timeSlot when present.
+ */
+function uniqueConstraintMessage(meta: unknown, req: Request): string {
   if (
     meta &&
     typeof meta === 'object' &&
@@ -15,11 +28,11 @@ function uniqueConstraintMessage(meta: unknown): string {
     if (target.includes('email')) {
       return 'An account with this email already exists.'
     }
-    if (
-      target.includes('user_id') &&
-      target.includes('reading_date') &&
-      target.includes('time_slot')
-    ) {
+    if (isReadingUniqueTarget(target)) {
+      const rawSlot = req.body?.timeSlot
+      if (typeof rawSlot === 'string' && rawSlot.trim() !== '') {
+        return `You already have an ${resolveTimeSlotLabel(rawSlot)} reading for this date.`
+      }
       return 'You already have a reading for this date and time slot.'
     }
   }
@@ -28,7 +41,7 @@ function uniqueConstraintMessage(meta: unknown): string {
 
 export function errorMiddleware(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
@@ -57,11 +70,16 @@ export function errorMiddleware(
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === 'P2002') {
-      const message = uniqueConstraintMessage(err.meta)
+      const message = uniqueConstraintMessage(err.meta, req)
+      const errors =
+        typeof req.body?.timeSlot === 'string'
+          ? { timeSlot: [message] }
+          : undefined
       res.status(409).json({
         success: false,
         statusCode: 409,
         message,
+        ...(errors ? { errors } : {}),
       })
       return
     }
@@ -77,5 +95,3 @@ export function errorMiddleware(
     message: 'Something went wrong. Please try again later.',
   })
 }
-
-export { resolveTimeSlotLabel } from '@/constants/time-slots'

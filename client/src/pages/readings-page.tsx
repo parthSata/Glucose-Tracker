@@ -56,6 +56,7 @@ export default function ReadingsPage() {
     setFieldValue,
     onSubmit,
   } = useCreateReading({
+    readings,
     onSuccess: (_reading, message) => {
       showSuccessToast(message)
       void refetch()
@@ -143,6 +144,7 @@ export default function ReadingsPage() {
       <ReadingEditModal
         open={editingReading !== null}
         reading={editingReading}
+        readings={readings}
         onClose={() => setEditingReading(null)}
         onUpdated={(_reading, message) => {
           showSuccessToast(message)

@@ -104,9 +104,35 @@ export function ReadingForm({
               name="value"
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="off"
               placeholder="e.g. 110"
               value={values.value}
               onChange={onChange}
+              onKeyDown={(event) => {
+                if (event.ctrlKey || event.metaKey || event.altKey) {
+                  return
+                }
+                const allowedKeys = [
+                  'Backspace',
+                  'Delete',
+                  'Tab',
+                  'Escape',
+                  'Enter',
+                  'ArrowLeft',
+                  'ArrowRight',
+                  'ArrowUp',
+                  'ArrowDown',
+                  'Home',
+                  'End',
+                ]
+                if (allowedKeys.includes(event.key)) {
+                  return
+                }
+                if (!/^\d$/.test(event.key)) {
+                  event.preventDefault()
+                }
+              }}
               hasError={Boolean(fieldErrors.value)}
               aria-invalid={Boolean(fieldErrors.value)}
               aria-describedby={
