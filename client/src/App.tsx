@@ -6,6 +6,7 @@ import DashboardPage from '@/pages/dashboard-page'
 import LoginPage from '@/pages/login-page'
 import ReadingsPage from '@/pages/readings-page'
 import RegisterPage from '@/pages/register-page'
+import ReportsPage from '@/pages/reports-page'
 import 'react-toastify/ReactToastify.css'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/readings" element={<ReadingsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
         <Route path="*" element={<HomeRedirect />} />
       </Routes>

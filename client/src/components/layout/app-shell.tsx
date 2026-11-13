@@ -47,6 +47,18 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
               >
                 Readings
               </NavLink>
+              <NavLink
+                to="/reports"
+                className={({ isActive }) =>
+                  `rounded-lg px-3 py-2 text-sm font-medium transition ${
+                    isActive
+                      ? 'bg-teal-700 text-white'
+                      : 'text-stone-700 hover:bg-teal-50 hover:text-teal-900'
+                  }`
+                }
+              >
+                Reports
+              </NavLink>
             </nav>
           </div>
 

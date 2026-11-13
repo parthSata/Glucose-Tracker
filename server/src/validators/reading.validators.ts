@@ -1,27 +1,15 @@
 import { z } from 'zod'
 import { TIME_SLOTS } from '@/constants/time-slots'
-import {
-  isDateOnlyString,
-  todayDateOnlyLocal,
-} from '@/lib/date-only'
+import { dateOnlyNotFutureSchema } from '@/validators/date.validators'
 
 const VALUE_RANGE_MESSAGE = 'Value must be between 40 and 600 mg/dl.'
 const VALUE_REQUIRED_MESSAGE = 'Please enter a glucose value.'
-const DATE_FUTURE_MESSAGE = 'Date cannot be in the future.'
 
 const timeSlotSchema = z.enum(TIME_SLOTS, {
   error: 'Please select a time slot.',
 })
 
-const readingDateSchema = z
-  .string({ error: 'Please select a date.' })
-  .trim()
-  .min(1, 'Please select a date.')
-  .refine(isDateOnlyString, 'Please select a valid date.')
-  .refine(
-    (value) => value <= todayDateOnlyLocal(),
-    DATE_FUTURE_MESSAGE,
-  )
+const readingDateSchema = dateOnlyNotFutureSchema
 
 /**
  * Accepts number or numeric string from JSON / forms.

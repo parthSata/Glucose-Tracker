@@ -54,3 +54,11 @@ export function formatGlucoseStat(value: number | null): string {
   }
   return String(value)
 }
+
+/** Always one decimal place for report averages. */
+export function formatAverageStat(value: number | null): string {
+  if (value === null) {
+    return '—'
+  }
+  return value.toFixed(1)
+}
