@@ -1,5 +1,5 @@
 import type { ChangeEvent, FormEvent } from 'react'
-import type { CreateReadingFormValues } from '@/lib/reading-schemas'
+import type { ReadingFormValues } from '@/lib/reading-schemas'
 import { TIME_SLOT_OPTIONS } from '@/lib/time-slots'
 import { Button } from '@/components/ui/button'
 import { Dropdown } from '@/components/ui/dropdown'
@@ -8,16 +8,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 type ReadingFormProps = {
-  values: CreateReadingFormValues
-  fieldErrors: Partial<Record<keyof CreateReadingFormValues, string>>
+  values: ReadingFormValues
+  fieldErrors: Partial<Record<keyof ReadingFormValues, string>>
   formError: string | null
   isSubmitting: boolean
   maxDate: string
+  submitLabel?: string
+  submittingLabel?: string
+  idPrefix?: string
+  onCancel?: () => void
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
-  setFieldValue: (
-    fieldName: keyof CreateReadingFormValues,
-    value: string,
-  ) => void
+  setFieldValue: (fieldName: keyof ReadingFormValues, value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
 }
 
@@ -27,24 +28,32 @@ export function ReadingForm({
   formError,
   isSubmitting,
   maxDate,
+  submitLabel = 'Save reading',
+  submittingLabel = 'Saving…',
+  idPrefix = '',
+  onCancel,
   onChange,
   setFieldValue,
   onSubmit,
 }: ReadingFormProps) {
+  function fieldId(name: string) {
+    return idPrefix ? `${idPrefix}-${name}` : name
+  }
+
   return (
     <form
       onSubmit={onSubmit}
       className="space-y-4"
       noValidate
-      aria-describedby={formError ? 'reading-form-error' : undefined}
+      aria-describedby={formError ? fieldId('form-error') : undefined}
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <Label htmlFor="readingDate" requiredMark>
+          <Label htmlFor={fieldId('readingDate')} requiredMark>
             Date
           </Label>
           <Input
-            id="readingDate"
+            id={fieldId('readingDate')}
             name="readingDate"
             type="date"
             max={maxDate}
@@ -53,18 +62,21 @@ export function ReadingForm({
             hasError={Boolean(fieldErrors.readingDate)}
             aria-invalid={Boolean(fieldErrors.readingDate)}
             aria-describedby={
-              fieldErrors.readingDate ? 'reading-date-error' : undefined
+              fieldErrors.readingDate ? fieldId('date-error') : undefined
             }
           />
-          <ErrorText id="reading-date-error" message={fieldErrors.readingDate} />
+          <ErrorText
+            id={fieldId('date-error')}
+            message={fieldErrors.readingDate}
+          />
         </div>
 
         <div className="sm:col-span-2">
-          <Label htmlFor="timeSlot" requiredMark>
+          <Label htmlFor={fieldId('timeSlot')} requiredMark>
             Time slot
           </Label>
           <Dropdown
-            id="timeSlot"
+            id={fieldId('timeSlot')}
             name="timeSlot"
             value={values.timeSlot}
             placeholder="Select a time slot"
@@ -72,20 +84,23 @@ export function ReadingForm({
             hasError={Boolean(fieldErrors.timeSlot)}
             aria-invalid={Boolean(fieldErrors.timeSlot)}
             aria-describedby={
-              fieldErrors.timeSlot ? 'reading-slot-error' : undefined
+              fieldErrors.timeSlot ? fieldId('slot-error') : undefined
             }
             onChange={(nextValue) => setFieldValue('timeSlot', nextValue)}
           />
-          <ErrorText id="reading-slot-error" message={fieldErrors.timeSlot} />
+          <ErrorText
+            id={fieldId('slot-error')}
+            message={fieldErrors.timeSlot}
+          />
         </div>
 
         <div className="sm:col-span-2">
-          <Label htmlFor="value" requiredMark>
+          <Label htmlFor={fieldId('value')} requiredMark>
             Glucose value
           </Label>
           <div className="flex items-stretch gap-2">
             <Input
-              id="value"
+              id={fieldId('value')}
               name="value"
               type="text"
               inputMode="numeric"
@@ -95,24 +110,27 @@ export function ReadingForm({
               hasError={Boolean(fieldErrors.value)}
               aria-invalid={Boolean(fieldErrors.value)}
               aria-describedby={
-                fieldErrors.value ? 'reading-value-error' : 'reading-value-unit'
+                fieldErrors.value ? fieldId('value-error') : fieldId('value-unit')
               }
               className="flex-1"
             />
             <span
-              id="reading-value-unit"
+              id={fieldId('value-unit')}
               className="inline-flex min-h-11 items-center rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium text-stone-600"
             >
               mg/dl
             </span>
           </div>
-          <ErrorText id="reading-value-error" message={fieldErrors.value} />
+          <ErrorText
+            id={fieldId('value-error')}
+            message={fieldErrors.value}
+          />
         </div>
       </div>
 
       {formError ? (
         <p
-          id="reading-form-error"
+          id={fieldId('form-error')}
           className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
           role="alert"
         >
@@ -120,9 +138,21 @@ export function ReadingForm({
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Saving…' : 'Save reading'}
-      </Button>
+      <div className={`grid gap-3 ${onCancel ? 'sm:grid-cols-2' : ''}`}>
+        {onCancel ? (
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting}
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? submittingLabel : submitLabel}
+        </Button>
+      </div>
     </form>
   )
 }

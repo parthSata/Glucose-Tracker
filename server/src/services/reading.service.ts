@@ -6,7 +6,10 @@ import {
 import { toDateOnlyUtc } from '@/lib/date-only'
 import { prisma } from '@/lib/prisma'
 import { toPublicReading } from '@/lib/public-reading'
-import type { CreateReadingBody } from '@/validators/reading.validators'
+import type {
+  CreateReadingBody,
+  UpdateReadingBody,
+} from '@/validators/reading.validators'
 import { ApiError } from '@/utils/api-error'
 
 function duplicateSlotMessage(timeSlot: string): string {
@@ -71,6 +74,73 @@ export async function createReadingForUser(
     const reading = await prisma.reading.create({
       data: {
         userId,
+        readingDate,
+        timeSlot: input.timeSlot,
+        value: input.value,
+      },
+    })
+
+    return toPublicReading(reading)
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      throw new ApiError(409, duplicateSlotMessage(input.timeSlot))
+    }
+    throw error
+  }
+}
+
+export async function updateReadingForUser(
+  userId: string,
+  readingId: string,
+  input: UpdateReadingBody,
+) {
+  const existing = await prisma.reading.findFirst({
+    where: {
+      id: readingId,
+      userId,
+    },
+    select: { id: true },
+  })
+
+  if (!existing) {
+    throw new ApiError(404, 'Reading not found.')
+  }
+
+  const readingDate = toDateOnlyUtc(input.readingDate)
+
+  const otherReadingsThatDay = await prisma.reading.count({
+    where: {
+      userId,
+      readingDate,
+      NOT: { id: readingId },
+    },
+  })
+
+  if (otherReadingsThatDay >= MAX_READINGS_PER_DAY) {
+    throw new ApiError(400, 'You can add only 4 readings per day.')
+  }
+
+  const slotConflict = await prisma.reading.findFirst({
+    where: {
+      userId,
+      readingDate,
+      timeSlot: input.timeSlot,
+      NOT: { id: readingId },
+    },
+    select: { id: true },
+  })
+
+  if (slotConflict) {
+    throw new ApiError(409, duplicateSlotMessage(input.timeSlot))
+  }
+
+  try {
+    const reading = await prisma.reading.update({
+      where: { id: readingId },
+      data: {
         readingDate,
         timeSlot: input.timeSlot,
         value: input.value,

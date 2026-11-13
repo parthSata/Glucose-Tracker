@@ -70,6 +70,9 @@ export const createReadingBodySchema = z.object({
   value: glucoseValueSchema,
 })
 
+/** Same field rules as create — assignment validation messages stay identical. */
+export const updateReadingBodySchema = createReadingBodySchema
+
 export const readingIdParamsSchema = z.object({
   id: z
     .string({ error: 'Reading id is required.' })
@@ -78,4 +81,5 @@ export const readingIdParamsSchema = z.object({
 })
 
 export type CreateReadingBody = z.infer<typeof createReadingBodySchema>
+export type UpdateReadingBody = z.infer<typeof updateReadingBodySchema>
 export type ReadingIdParams = z.infer<typeof readingIdParamsSchema>

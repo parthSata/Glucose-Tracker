@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AppShell } from '@/components/layout/app-shell'
 import { ReadingDetailModal } from '@/components/features/readings/reading-detail-modal'
+import { ReadingEditModal } from '@/components/features/readings/reading-edit-modal'
 import { ReadingForm } from '@/components/features/readings/reading-form'
 import { ReadingList } from '@/components/features/readings/reading-list'
 import { useCreateReading } from '@/hooks/use-create-reading'
@@ -12,6 +13,7 @@ import {
   type ReadingDateSort,
 } from '@/lib/sort-readings'
 import { showSuccessToast } from '@/lib/toast'
+import type { Reading } from '@/types/reading'
 
 export default function ReadingsPage() {
   const { readings, isLoading, error, refetch } = useReadings()
@@ -21,6 +23,7 @@ export default function ReadingsPage() {
   const [selectedReadingId, setSelectedReadingId] = useState<string | null>(
     null,
   )
+  const [editingReading, setEditingReading] = useState<Reading | null>(null)
 
   const sortedReadings = sortReadingsByDate(readings, dateSort)
 
@@ -46,6 +49,11 @@ export default function ReadingsPage() {
       void refetch()
     },
   })
+
+  function openEdit(reading: Reading) {
+    setSelectedReadingId(null)
+    setEditingReading(reading)
+  }
 
   return (
     <AppShell
@@ -79,7 +87,7 @@ export default function ReadingsPage() {
                 Your readings
               </h2>
               <p className="mt-1 text-sm text-stone-600">
-                Tap a reading to view full details.
+                View details or edit any reading.
               </p>
             </div>
             <p className="text-sm font-medium text-stone-500">
@@ -93,6 +101,7 @@ export default function ReadingsPage() {
             sort={dateSort}
             onSortChange={setDateSort}
             onViewReading={setSelectedReadingId}
+            onEditReading={openEdit}
             onRetry={() => {
               void refetch()
             }}
@@ -107,6 +116,18 @@ export default function ReadingsPage() {
         error={detailError}
         onClose={() => setSelectedReadingId(null)}
         onRetry={retryDetail}
+        onEdit={openEdit}
+      />
+
+      <ReadingEditModal
+        open={editingReading !== null}
+        reading={editingReading}
+        onClose={() => setEditingReading(null)}
+        onUpdated={(_reading, message) => {
+          showSuccessToast(message)
+          setEditingReading(null)
+          void refetch()
+        }}
       />
     </AppShell>
   )

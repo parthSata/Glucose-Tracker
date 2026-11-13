@@ -1,12 +1,13 @@
 import { z } from 'zod'
 import { isDateOnlyString, todayDateOnlyLocal } from '@/lib/date-only'
 import { TIME_SLOTS } from '@/lib/time-slots'
+import type { Reading } from '@/types/reading'
 
 const VALUE_RANGE_MESSAGE = 'Value must be between 40 and 600 mg/dl.'
 const VALUE_REQUIRED_MESSAGE = 'Please enter a glucose value.'
 const DATE_FUTURE_MESSAGE = 'Date cannot be in the future.'
 
-export const createReadingFormSchema = z.object({
+export const readingFormSchema = z.object({
   readingDate: z
     .string({ error: 'Please select a date.' })
     .trim()
@@ -40,25 +41,42 @@ export const createReadingFormSchema = z.object({
     }),
 })
 
+/** Shared create/update form schema (same assignment messages). */
+export const createReadingFormSchema = readingFormSchema
+
 /** Form state allows empty slot before the user selects one. */
-export type CreateReadingFormValues = {
+export type ReadingFormValues = {
   readingDate: string
   timeSlot: (typeof TIME_SLOTS)[number] | ''
   value: string
 }
 
-export type CreateReadingPayload = {
+export type CreateReadingFormValues = ReadingFormValues
+
+export type ReadingPayload = {
   readingDate: string
   timeSlot: (typeof TIME_SLOTS)[number]
   value: number
 }
 
-export function toCreateReadingPayload(
-  values: z.infer<typeof createReadingFormSchema>,
-): CreateReadingPayload {
+export type CreateReadingPayload = ReadingPayload
+
+export function toReadingPayload(
+  values: z.infer<typeof readingFormSchema>,
+): ReadingPayload {
   return {
     readingDate: values.readingDate,
     timeSlot: values.timeSlot,
     value: Number(values.value),
+  }
+}
+
+export const toCreateReadingPayload = toReadingPayload
+
+export function readingToFormValues(reading: Reading): ReadingFormValues {
+  return {
+    readingDate: reading.readingDate,
+    timeSlot: reading.timeSlot,
+    value: String(reading.value),
   }
 }

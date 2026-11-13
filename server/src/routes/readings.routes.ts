@@ -3,6 +3,7 @@ import {
   createReading,
   getReading,
   listReadings,
+  updateReading,
 } from '@/controllers/reading.controller'
 import { authMiddleware } from '@/middleware/auth.middleware'
 import { validateRequest } from '@/middleware/validate.middleware'
@@ -10,6 +11,7 @@ import { asyncHandler } from '@/utils/async-handler'
 import {
   createReadingBodySchema,
   readingIdParamsSchema,
+  updateReadingBodySchema,
 } from '@/validators/reading.validators'
 
 const readingsRoutes = Router()
@@ -28,6 +30,13 @@ readingsRoutes.post(
   '/',
   validateRequest(createReadingBodySchema),
   asyncHandler(createReading),
+)
+
+readingsRoutes.put(
+  '/:id',
+  validateRequest(readingIdParamsSchema, 'params'),
+  validateRequest(updateReadingBodySchema),
+  asyncHandler(updateReading),
 )
 
 export { readingsRoutes }

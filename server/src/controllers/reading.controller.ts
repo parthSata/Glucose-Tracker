@@ -3,10 +3,12 @@ import {
   createReadingForUser,
   getReadingForUser,
   listReadingsForUser,
+  updateReadingForUser,
 } from '@/services/reading.service'
 import type {
   CreateReadingBody,
   ReadingIdParams,
+  UpdateReadingBody,
 } from '@/validators/reading.validators'
 import { requireAuthUser } from '@/utils/require-auth-user'
 import { ApiResponse } from '@/utils/api-response'
@@ -41,4 +43,18 @@ export async function createReading(
   res
     .status(201)
     .json(new ApiResponse(201, { reading }, 'Reading saved successfully.'))
+}
+
+export async function updateReading(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const authUser = requireAuthUser(req)
+  const { id } = req.params as ReadingIdParams
+  const body = req.body as UpdateReadingBody
+  const reading = await updateReadingForUser(authUser.id, id, body)
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, { reading }, 'Reading updated successfully.'))
 }
