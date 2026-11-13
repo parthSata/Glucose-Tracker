@@ -1,13 +1,38 @@
+import { useState } from 'react'
 import { DailyReadingList } from '@/components/features/reports/daily-reading-list'
 import { ReportDatePicker } from '@/components/features/reports/report-date-picker'
+import { ReportEmptyState } from '@/components/features/reports/report-empty-state'
 import { ReportSummary } from '@/components/features/reports/report-summary'
+import { ReportTypeSwitcher } from '@/components/features/reports/report-type-switcher'
 import { AppShell } from '@/components/layout/app-shell'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { formatDisplayDate } from '@/lib/format-display-date'
-import { useDailyReport } from '@/hooks/use-daily-report'
+import { formatDisplayDateRange } from '@/lib/format-display-date'
+import { useReport } from '@/hooks/use-report'
+import type { DailyReport, ReportKind } from '@/types/report'
+
+const REPORT_COPY: Record<
+  ReportKind,
+  { eyebrow: string; title: string; description: string; loading: string }
+> = {
+  daily: {
+    eyebrow: 'Daily report',
+    title: 'Choose a date',
+    description:
+      'Stats and readings are scoped to your account for the selected calendar day.',
+    loading: 'Loading daily report…',
+  },
+  'month-to-date': {
+    eyebrow: 'Month-to-date report',
+    title: 'Choose an end date',
+    description:
+      'Covers the 1st of that month through your selected date (inclusive).',
+    loading: 'Loading month-to-date report…',
+  },
+}
 
 export default function ReportsPage() {
+  const [kind, setKind] = useState<ReportKind>('daily')
   const {
     selectedDate,
     setSelectedDate,
@@ -17,28 +42,34 @@ export default function ReportsPage() {
     isLoading,
     error,
     refetch,
-  } = useDailyReport()
+  } = useReport(kind)
 
+  const copy = REPORT_COPY[kind]
   const rangeLabel = report
-    ? formatDisplayDate(report.range.start)
-    : formatDisplayDate(selectedDate)
+    ? formatDisplayDateRange(report.range.start, report.range.end)
+    : formatDisplayDateRange(selectedDate, selectedDate)
+
+  const dailyReadings =
+    kind === 'daily' && report && 'readings' in report
+      ? (report as DailyReport).readings
+      : []
 
   return (
     <AppShell
       title="Reports"
-      subtitle="Review highest, lowest, and average glucose for a selected day."
+      subtitle="Review highest, lowest, and average glucose for the period you select."
     >
       <div className="space-y-6">
         <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:p-8">
-          <p className="text-sm font-semibold tracking-wide text-teal-800 uppercase">
-            Daily report
+          <ReportTypeSwitcher value={kind} onChange={setKind} />
+          <p className="mt-5 text-sm font-semibold tracking-wide text-teal-800 uppercase">
+            {copy.eyebrow}
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-stone-900">
-            Choose a date
+            {copy.title}
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-stone-600">
-            Stats and readings are scoped to your account for the selected
-            calendar day.
+            {copy.description}
           </p>
           <div className="mt-5">
             <ReportDatePicker
@@ -52,7 +83,7 @@ export default function ReportsPage() {
 
         <section className="rounded-2xl border border-stone-200/80 bg-white/90 p-6 shadow-sm lg:p-8">
           {isLoading ? (
-            <Spinner label="Loading daily report…" />
+            <Spinner label={copy.loading} />
           ) : error ? (
             <div className="space-y-3 rounded-xl border border-red-200 bg-red-50/80 px-4 py-6 text-center">
               <p className="text-sm font-medium text-red-800">{error}</p>
@@ -69,7 +100,7 @@ export default function ReportsPage() {
             </div>
           ) : dateError ? (
             <p className="text-sm text-stone-600">
-              Choose a valid date to view the daily report.
+              Choose a valid date to view the report.
             </p>
           ) : report ? (
             <div className="space-y-8">
@@ -81,12 +112,16 @@ export default function ReportsPage() {
                 count={report.count}
               />
 
-              <div>
-                <h3 className="mb-4 text-lg font-semibold text-stone-900">
-                  Readings for this day
-                </h3>
-                <DailyReadingList readings={report.readings} />
-              </div>
+              {kind === 'daily' ? (
+                <div>
+                  <h3 className="mb-4 text-lg font-semibold text-stone-900">
+                    Readings for this day
+                  </h3>
+                  <DailyReadingList readings={dailyReadings} />
+                </div>
+              ) : report.count === 0 ? (
+                <ReportEmptyState />
+              ) : null}
             </div>
           ) : null}
         </section>

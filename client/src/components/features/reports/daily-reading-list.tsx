@@ -1,5 +1,5 @@
 import { DailyReadingItem } from '@/components/features/reports/daily-reading-item'
-import { EmptyState } from '@/components/ui/empty-state'
+import { ReportEmptyState } from '@/components/features/reports/report-empty-state'
 import type { ReportReadingItem } from '@/types/report'
 
 type DailyReadingListProps = {
@@ -8,12 +8,7 @@ type DailyReadingListProps = {
 
 export function DailyReadingList({ readings }: DailyReadingListProps) {
   if (readings.length === 0) {
-    return (
-      <EmptyState
-        title="No glucose readings found for this period."
-        description="Start recording your readings to see your report."
-      />
-    )
+    return <ReportEmptyState />
   }
 
   return (

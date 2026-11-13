@@ -3,12 +3,17 @@ import { useEffect, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
 import { todayDateOnlyLocal } from '@/lib/date-only'
 import { reportDateFormSchema } from '@/lib/date-schemas'
-import type { DailyReport } from '@/types/report'
+import type {
+  DailyReport,
+  MonthToDateReport,
+  ReportKind,
+  ReportSummaryData,
+} from '@/types/report'
 
-type ApiSuccess = {
+type ApiSuccess<T> = {
   success: true
   message: string
-  data: DailyReport
+  data: T
 }
 
 type ApiFailure = {
@@ -17,10 +22,20 @@ type ApiFailure = {
   errors?: Record<string, string[] | undefined>
 }
 
-export function useDailyReport() {
+const REPORT_PATH: Record<ReportKind, string> = {
+  daily: '/reports/daily',
+  'month-to-date': '/reports/month-to-date',
+}
+
+const REPORT_LOAD_ERROR: Record<ReportKind, string> = {
+  daily: 'Could not load daily report.',
+  'month-to-date': 'Could not load month-to-date report.',
+}
+
+export function useReport(kind: ReportKind) {
   const [selectedDate, setSelectedDateState] = useState(todayDateOnlyLocal)
   const [dateError, setDateError] = useState<string | null>(null)
-  const [report, setReport] = useState<DailyReport | null>(null)
+  const [report, setReport] = useState<ReportSummaryData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -53,12 +68,14 @@ export function useDailyReport() {
     const dateToFetch = parsed.data.date
     let cancelled = false
 
-    async function fetchDailyReport() {
+    async function fetchReport() {
       setIsLoading(true)
       setError(null)
 
       try {
-        const response = await apiClient.get<ApiSuccess>('/reports/daily', {
+        const response = await apiClient.get<
+          ApiSuccess<DailyReport | MonthToDateReport>
+        >(REPORT_PATH[kind], {
           params: { date: dateToFetch },
         })
         if (!cancelled) {
@@ -75,9 +92,9 @@ export function useDailyReport() {
           if (fieldMessage) {
             setDateError(fieldMessage)
           }
-          setError(data.message || 'Could not load daily report.')
+          setError(data.message || REPORT_LOAD_ERROR[kind])
         } else {
-          setError('Could not load daily report. Please try again.')
+          setError(`${REPORT_LOAD_ERROR[kind]} Please try again.`)
         }
         setReport(null)
       } finally {
@@ -87,12 +104,12 @@ export function useDailyReport() {
       }
     }
 
-    void fetchDailyReport()
+    void fetchReport()
 
     return () => {
       cancelled = true
     }
-  }, [selectedDate, reloadKey])
+  }, [kind, selectedDate, reloadKey])
 
   function refetch() {
     setReloadKey((current) => current + 1)
