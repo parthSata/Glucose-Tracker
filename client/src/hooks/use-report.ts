@@ -6,6 +6,7 @@ import { reportDateFormSchema } from '@/lib/date-schemas'
 import type {
   DailyReport,
   MonthToDateReport,
+  MonthlyReport,
   ReportKind,
   ReportSummaryData,
 } from '@/types/report'
@@ -25,11 +26,13 @@ type ApiFailure = {
 const REPORT_PATH: Record<ReportKind, string> = {
   daily: '/reports/daily',
   'month-to-date': '/reports/month-to-date',
+  monthly: '/reports/monthly',
 }
 
 const REPORT_LOAD_ERROR: Record<ReportKind, string> = {
   daily: 'Could not load daily report.',
   'month-to-date': 'Could not load month-to-date report.',
+  monthly: 'Could not load monthly report.',
 }
 
 export function useReport(kind: ReportKind) {
@@ -74,7 +77,7 @@ export function useReport(kind: ReportKind) {
 
       try {
         const response = await apiClient.get<
-          ApiSuccess<DailyReport | MonthToDateReport>
+          ApiSuccess<DailyReport | MonthToDateReport | MonthlyReport>
         >(REPORT_PATH[kind], {
           params: { date: dateToFetch },
         })

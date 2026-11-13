@@ -1,6 +1,6 @@
 import type { TimeSlotValue } from '@/lib/time-slots'
 
-export type ReportKind = 'daily' | 'month-to-date'
+export type ReportKind = 'daily' | 'month-to-date' | 'monthly'
 
 export type ReportReadingItem = {
   id: string
@@ -28,3 +28,5 @@ export type DailyReport = ReportSummaryData & {
 }
 
 export type MonthToDateReport = ReportSummaryData
+
+export type MonthlyReport = ReportSummaryData

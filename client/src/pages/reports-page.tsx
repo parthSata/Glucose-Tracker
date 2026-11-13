@@ -29,6 +29,13 @@ const REPORT_COPY: Record<
       'Covers the 1st of that month through your selected date (inclusive).',
     loading: 'Loading month-to-date report…',
   },
+  monthly: {
+    eyebrow: 'Monthly report',
+    title: 'Choose a reference date',
+    description:
+      'Shows the entire previous calendar month relative to your selected date (not the current month).',
+    loading: 'Loading monthly report…',
+  },
 }
 
 export default function ReportsPage() {

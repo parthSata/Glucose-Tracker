@@ -1,6 +1,6 @@
 import { toDateOnlyUtc } from '@/lib/date-only'
 import { prisma } from '@/lib/prisma'
-import { monthToDateRange } from '@/lib/report-ranges'
+import { monthToDateRange, previousMonthRange } from '@/lib/report-ranges'
 import {
   computeReadingStats,
   sortReadingsBySlot,
@@ -47,6 +47,23 @@ export async function getMonthToDateReportForUser(
   dateOnly: string,
 ) {
   const range = monthToDateRange(dateOnly)
+  const readings = await getReadingsInRange(userId, range.start, range.end)
+  const stats = computeReadingStats(readings.map((reading) => reading.value))
+
+  return {
+    range,
+    highest: stats.highest,
+    lowest: stats.lowest,
+    average: stats.average,
+    count: stats.count,
+  }
+}
+
+export async function getMonthlyReportForUser(
+  userId: string,
+  dateOnly: string,
+) {
+  const range = previousMonthRange(dateOnly)
   const readings = await getReadingsInRange(userId, range.start, range.end)
   const stats = computeReadingStats(readings.map((reading) => reading.value))
 

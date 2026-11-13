@@ -8,6 +8,7 @@ type ReportTypeSwitcherProps = {
 const OPTIONS: Array<{ value: ReportKind; label: string }> = [
   { value: 'daily', label: 'Daily' },
   { value: 'month-to-date', label: 'Month-to-date' },
+  { value: 'monthly', label: 'Monthly' },
 ]
 
 export function ReportTypeSwitcher({
